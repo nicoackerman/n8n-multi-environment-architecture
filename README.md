@@ -1,6 +1,6 @@
 # n8n — Multi-enviroment architecture (local / development / production)
 
-## Enviroments Over
+## Enviroments Overview
 
 ### 🖥️ Local Environment (per developer)
 * **Infrastructure:**
@@ -19,7 +19,7 @@
 * **Deployment:**
     * Workflows are deployed automatically after a Push/Merge to the `develop` branch (or via Pull Request approval).
 * **Configuration:**
-    * **Environment Variables:** Injected exclusively via server configuration (`.env` files).
+    * **Environment Variables:** Injected exclusively via server configuration.
     * **Parity:** Must mirror the Production environment in terms of resources (e.g., CPU/RAM) and DB engine (supabase).
 * **Purpose:**
     * Webhook validation in a stable environment.
@@ -41,6 +41,33 @@
 > **Note:**  
 > If using **n8n Enterprise**, Git-based workflow sync is native.  
 > In **Community Edition**, sync is done via CLI/API or CI/CD jobs.
+
+## Expected flow
+
+### 1. Developer commits workflow JSON files:
+All workflows are stored as JSON under: /workflows/*.workflow.json
+
+### 2. Developer opens a Pull Request: 
+A Pull Request (PR) is created to merge the feature branch into `develop`.
+
+### 3. GitHub Actions validates the workflows:
+When a PR is opened, CI automatically runs.
+
+### 4. PR is merged → triggers auto-deployment
+
+### When merged into `develop`:
+- GitHub Actions runs **deploy-to-development** job.
+- All workflows are bundled into a deployment artifact.
+- The workflows are automatically imported into the **Staging n8n instance** using the n8n API or CLI.
+- Smoke tests may be executed to confirm correct deployment.
+
+### When merged into `main`:
+- GitHub Actions runs **deploy-to-production** job.
+- The same deployment process runs, but targets the **Production instance**.
+- Production jobs may require manual approval (protected environment).
+
+## 5. n8n imports workflows automatically: 
+CI uploads each workflow file.
 
 ## Infrastrcuture
 
