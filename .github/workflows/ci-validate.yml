@@ -1,0 +1,35 @@
+name: CI - Validate n8n Workflows
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Validate JSON syntax
+        run: |
+          for f in workflows/*.json; do
+            echo "Validating $f"
+            cat "$f" | jq empty
+          done
+
+      - name: Lint JSON (pretty format)
+        run: |
+          for f in workflows/*.json; do
+            jq . "$f" > tmp.json && mv tmp.json "$f"
+          done
+
+      - name: Check prohibited secrets (simple scan)
+        run: |
+          if grep -R "API_KEY" -n workflows; then
+            echo "❌ Found direct secrets in workflows!"
+            exit 1
+          fi

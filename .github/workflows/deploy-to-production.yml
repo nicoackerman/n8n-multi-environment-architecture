@@ -1,0 +1,29 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ secrets.N8N_PROD_CONSOLE }}
+      # Requires manual approval
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy workflows to Production
+        run: |
+          for f in workflows/*.json; do
+            echo "Deploying $f..."
+            curl -X POST "$N8N_API_URL_PROD/rest/workflows/import" \
+              -H "Authorization: Bearer $N8N_API_KEY_PROD" \
+              -H "Content-Type: application/json" \
+              --data @"$f"
+          done
+    env:
+      N8N_API_URL_PROD: ${{ secrets.N8N_API_URL_PROD }}
+      N8N_API_KEY_PROD: ${{ secrets.N8N_API_KEY_PROD }}

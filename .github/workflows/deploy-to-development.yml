@@ -1,0 +1,26 @@
+name: Deploy to Development
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy workflows to Development
+        run: |
+          for f in workflows/*.json; do
+            echo "Deploying $f..."
+            curl -X POST "$N8N_API_URL_DEV/rest/workflows/import" \
+              -H "Authorization: Bearer $N8N_API_KEY_DEV" \
+              -H "Content-Type: application/json" \
+              --data @"$f"
+          done
+    env:
+      N8N_API_URL_DEV: ${{ secrets.N8N_API_URL_DEV }}
+      N8N_API_KEY_DEV: ${{ secrets.N8N_API_KEY_DEV }}

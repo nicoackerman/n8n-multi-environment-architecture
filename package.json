@@ -1,0 +1,21 @@
+{
+  "name": "n8n-multi-environment",
+  "version": "1.0.0",
+  "description": "Helper scripts for n8n multi-environment architecture",
+  "scripts": {
+    "start": "docker compose -f compose.local.yaml up -d",
+    "stop": "docker compose -f compose.local.yaml down",
+    "logs": "docker compose -f compose.local.yaml logs -f",
+    "export": "echo 'Exporting workflows...' && mkdir -p workflows && docker exec -it n8n-n8n-1 n8n export:workflow --all --output=/files/workflows/ && mv local-files/workflows/*.json workflows/ && echo '✅ Workflows exported to workflows/ directory'",
+    "validate": "for f in workflows/*.json; do echo \"Validating $f\" && cat \"$f\" | jq empty || exit 1; done && echo '✅ All workflows are valid JSON'"
+  },
+  "keywords": [
+    "n8n",
+    "workflow",
+    "automation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {}
+}

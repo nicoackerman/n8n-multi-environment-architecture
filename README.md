@@ -45,7 +45,39 @@
 ## Expected flow
 
 ### 1. Developer commits workflow JSON files:
-All workflows are stored as JSON under: /workflows/*.workflow.json
+All workflows are stored as JSON under: `/workflows/*.json`
+
+> **Tip:** Use the helper scripts to manage your local environment and exports.
+
+#### Local Development Workflow
+1. **Start Local Environment:**
+   ```bash
+   npm run start
+   ```
+   Access n8n at `https://n8n.localhost` (or your configured domain).
+
+2. **Edit Workflows:**
+   Make changes in the local n8n UI.
+
+3. **Export Changes:**
+   When ready, export your workflows from the Docker container to your local folder:
+   ```bash
+   npm run export
+   ```
+   This will update the JSON files in the `workflows/` directory.
+
+4. **Validate:**
+   Check if the JSON files are valid:
+   ```bash
+   npm run validate
+   ```
+
+5. **Commit & Push:**
+   ```bash
+   git add workflows/
+   git commit -m "feat: update workflow"
+   git push origin feature/my-new-workflow
+   ```
 
 ### 2. Developer opens a Pull Request: 
 A Pull Request (PR) is created to merge the feature branch into `develop`.

@@ -1,0 +1,305 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "id": "7b11c325-f0ef-4cd1-a574-dd312e019b1b",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "position": [-1648, 208],
+      "typeVersion": 1.2,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "95uoCpFweHuq46rz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $('Gmail Trigger').item.json.text }}{{ $('Gmail Trigger').item.json.headers.subject }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Questions",
+              "description": "Use this category when the email is asking for information about our company, products, processes, pricing, timelines, legal terms or any other general inquiry that expects a factual explanation or guidance."
+            },
+            {
+              "category": "Project Update",
+              "description": "Choose this category when the sender is notifying us about progress or changes: signing the agreement, submitting or revising scripts, updating requirements, sharing evaluation results, or any status report that moves an ongoing project forward"
+            },
+            {
+              "category": "Feedback",
+              "description": "Select this category when the email contains compliments, complaints, suggestions, or any qualitative feedback about our service, product, communication or overall experience"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "15b3dd69-8dd8-456c-841b-bda36306c753",
+      "name": "Text Classifier",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "position": [-1200, 192],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "41fac766-6688-48f9-9a00-dbd5268c30cd",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [-1200, 464],
+      "typeVersion": 1,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "tAlWYPU9zEucDwlh",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "message": "Got it. Question",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [-864, 64],
+      "id": "3490f2d9-29d7-47b9-801d-2914fa8a50b3",
+      "name": "Reply to a message",
+      "webhookId": "59a8dc94-2f7e-4838-a98a-d781dbe447ad",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "95uoCpFweHuq46rz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "message": "Got it.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [-864, 208],
+      "id": "846ce72c-eb78-43a7-8643-7d9f28f68ce0",
+      "name": "Reply to a message1",
+      "webhookId": "59a8dc94-2f7e-4838-a98a-d781dbe447ad",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "95uoCpFweHuq46rz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "message": "Got it.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [-864, 352],
+      "id": "99c5bb7f-a9e4-4d30-b73f-b942af9cf14c",
+      "name": "Reply to a message2",
+      "webhookId": "59a8dc94-2f7e-4838-a98a-d781dbe447ad",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "95uoCpFweHuq46rz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $json.threadId }}"
+      },
+      "id": "b2870a34-c68a-47af-8176-f00bb6102110",
+      "name": "Mark as Read1",
+      "type": "n8n-nodes-base.gmail",
+      "position": [-1424, 208],
+      "webhookId": "a5bea8d3-719e-4b2b-a43d-4c6248796267",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "95uoCpFweHuq46rz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger1').all()[0].json.id }}\n",
+        "labelIds": ["CATEGORY_UPDATES"]
+      },
+      "id": "165dcb8b-5399-4638-97c2-939c1fbe1950",
+      "name": "Apply Label1",
+      "type": "n8n-nodes-base.gmail",
+      "position": [-624, 416],
+      "webhookId": "c3a2fc4e-d90c-463a-a356-db530e1b91b0",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "95uoCpFweHuq46rz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.threadId }}",
+        "labelIds": ["IMPORTANT"]
+      },
+      "id": "5685fff1-6738-4507-89a7-49865543bc6b",
+      "name": "Apply Label2",
+      "type": "n8n-nodes-base.gmail",
+      "position": [-624, 48],
+      "webhookId": "c3a2fc4e-d90c-463a-a356-db530e1b91b0",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "95uoCpFweHuq46rz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger1').all()[0].json.id }}\n",
+        "labelIds": ["CATEGORY_UPDATES"]
+      },
+      "id": "e8b206ac-8ca8-41c6-b9fb-708a517a1735",
+      "name": "Apply Label3",
+      "type": "n8n-nodes-base.gmail",
+      "position": [-624, 224],
+      "webhookId": "c3a2fc4e-d90c-463a-a356-db530e1b91b0",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "95uoCpFweHuq46rz",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Mark as Read1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reply to a message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reply to a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message": {
+      "main": [
+        [
+          {
+            "node": "Apply Label2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message1": {
+      "main": [
+        [
+          {
+            "node": "Apply Label3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message2": {
+      "main": [
+        [
+          {
+            "node": "Apply Label1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Read1": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5d56d4f6ee29db42c49b3be5fcdbcfa13305e0b549d5f3ab319b58c165216903"
+  }
+}
