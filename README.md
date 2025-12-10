@@ -42,64 +42,79 @@
 > If using **n8n Enterprise**, Git-based workflow sync is native.  
 > In **Community Edition**, sync is done via CLI/API or CI/CD jobs.
 
-## Expected flow
+## 🔄 Deployment Workflow (The Lifecycle)
 
-### 1. Developer commits workflow JSON files:
-All workflows are stored as JSON under: `/workflows/*.json`
+This project follows a strict GitOps flow. Workflows move from **Local** → **Develop** → **Production** via Git commits and Pull Requests.
 
-> **Tip:** Use the helper scripts to manage your local environment and exports.
+### Phase 1: Local Development 💻
+*Goal: Create and test workflows safely.*
 
-#### Local Development Workflow
-1. **Start Local Environment:**
-   ```bash
-   npm run start
-   ```
-   Access n8n at `https://n8n.localhost` (or your configured domain).
+1.  **Start Environment:**
+    ```bash
+    npm run start
+    ```
+2.  **Develop in n8n:**
+    *   Open `https://n8n.localhost`.
+    *   **Credentials:** Use your local `.env` file for API Keys. For OAuth2 (Gmail, Slack), authenticate manually in your local instance.
+3.  **Export Workflows:**
+    When finished, export your work to the file system:
+    ```bash
+    npm run export
+    ```
+    *This updates the JSON files in `workflows/`.*
+4.  **Validate & Commit:**
+    ```bash
+    npm run validate
+    git add .
+    git commit -m "feat: add new email processing workflow"
+    git push origin feature/my-feature
+    ```
 
-2. **Edit Workflows:**
-   Make changes in the local n8n UI.
+### Phase 2: Deploy to Development (Staging) 🧪
+*Goal: Integration testing in a server environment.*
 
-3. **Export Changes:**
-   When ready, export your workflows from the Docker container to your local folder:
-   ```bash
-   npm run export
-   ```
-   This will update the JSON files in the `workflows/` directory.
+1.  **Open Pull Request:**
+    *   Create a PR from `feature/my-feature` to `develop`.
+2.  **Automated Checks:**
+    *   GitHub Actions runs `ci-validate.yml` to check JSON syntax and scan for hardcoded secrets.
+3.  **Merge & Deploy:**
+    *   When the PR is merged, the **Deploy to Development** action runs.
+    *   Workflows are uploaded to the **Development n8n Instance**.
+4.  **Verify:**
+    *   Log in to the Development instance.
+    *   **One-time Setup:** Ensure any new Credentials (especially OAuth2) exist in this environment with the *same ID* or name as referenced in the workflow.
 
-4. **Validate:**
-   Check if the JSON files are valid:
-   ```bash
-   npm run validate
-   ```
+### Phase 3: Deploy to Production 🚀
+*Goal: Live release.*
 
-5. **Commit & Push:**
-   ```bash
-   git add workflows/
-   git commit -m "feat: update workflow"
-   git push origin feature/my-new-workflow
-   ```
+1.  **Promote to Main:**
+    *   Create a PR from `develop` to `main`.
+2.  **Review:**
+    *   Team reviews the changes. This is the final gate.
+3.  **Merge & Deploy:**
+    *   When merged, the **Deploy to Production** action runs.
+    *   Workflows are uploaded to the **Production n8n Instance**.
 
-### 2. Developer opens a Pull Request: 
-A Pull Request (PR) is created to merge the feature branch into `develop`.
+---
 
-### 3. GitHub Actions validates the workflows:
-When a PR is opened, CI automatically runs.
+## 🔐 Managing Secrets & Credentials
 
-### 4. PR is merged → triggers auto-deployment
+To ensure workflows run correctly across environments without exposing secrets:
 
-### When merged into `develop`:
-- GitHub Actions runs **deploy-to-development** job.
-- All workflows are bundled into a deployment artifact.
-- The workflows are automatically imported into the **Staging n8n instance** using the n8n API or CLI.
-- Smoke tests may be executed to confirm correct deployment.
+### 1. API Keys & Passwords (The "Env Var" Method)
+**Best for:** OpenAI, Stripe, Database passwords.
+*   **Do not** save the key in the n8n Credential UI.
+*   **Instead:**
+    1.  Define the variable in your environment (e.g., `.env` locally, Server Variables in Prod).
+    2.  In n8n, use an expression: `{{ $env.MY_API_KEY }}`.
 
-### When merged into `main`:
-- GitHub Actions runs **deploy-to-production** job.
-- The same deployment process runs, but targets the **Production instance**.
-- Production jobs may require manual approval (protected environment).
-
-## 5. n8n imports workflows automatically: 
-CI uploads each workflow file.
+### 2. OAuth2 Credentials (Gmail, Slack, Sheets)
+**Best for:** Services requiring token refresh.
+*   **Challenge:** OAuth tokens cannot be simple environment variables.
+*   **Strategy:**
+    1.  Create the credential manually in **Production** *once*.
+    2.  Ensure your workflow references this credential.
+    3.  *Pro Tip:* Keep credential IDs consistent if possible, or use n8n's Project feature (Enterprise) for automatic mapping. For Community Edition, manual verification in the target environment is required the first time a new credential is added.
 
 ## Infrastrcuture
 
